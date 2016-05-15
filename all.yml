@@ -1,0 +1,5 @@
+---
+- name: kitchen-ansiblepush demo
+  hosts: all
+  roles:
+    - { role: nginx, tags: [ nginx ] }

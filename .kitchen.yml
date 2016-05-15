@@ -1,0 +1,42 @@
+---
+driver:
+  name: ec2
+  region: ap-northeast-1
+  aws_ssh_key_id: <%= ENV['AWS_SSH_KEY_ID'] %>
+  associate_public_ip: true
+  interface: public
+  instance_type: t2.nano
+  block_device_mappings:
+    - device_name: /dev/xvda
+      ebs:
+        volume_type: standard
+        volume_size: 8
+        delete_on_termination: true
+  tags:
+    Name: Created-by-test-kitchen-at-<%= Time.now.strftime('%Y%m%d') %>
+
+transport:
+  ssh_key: ~/.ssh/<%= ENV['AWS_SSH_KEY_ID'] %>.pem
+  connection_timeout: 30
+  connection_retries: 5
+  username: ec2-user
+
+provisioner:
+  name: ansible_push
+  playbook: site.yml
+  sudo: true
+  chef_bootstrap_url: false
+
+platforms:
+  - name: AmazonLinux-2016031
+    driver:
+      image_id: ami-29160d47
+
+verifier:
+  name: shell
+  command: |
+    bundle exec rspec -c -f d -I serverspec spec/nginx/nginx_spec.rb
+
+suites:
+  - name: default
+    run_list:
